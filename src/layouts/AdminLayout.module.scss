@@ -75,6 +75,18 @@
       padding: 24px;
       overflow: auto;
       height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .breadcrumb {
+        flex-shrink: 0;
+        margin-bottom: 16px;
+      }
+
+      .pageContent {
+        flex: 1;
+        overflow: auto;
+      }
     }
   }
 }

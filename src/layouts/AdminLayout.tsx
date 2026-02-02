@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Nav, Avatar, Dropdown } from '@douyinfe/semi-ui-19';
+import { Nav, Avatar, Dropdown, Breadcrumb, Typography } from '@douyinfe/semi-ui-19';
 import {
   IconUser,
   IconSetting,
@@ -61,6 +61,26 @@ const pathToTopNav: Record<string, string> = {
   '/settings': 'settings',
 };
 
+// 顶部导航名称映射
+const topNavNameMap: Record<string, string> = {
+  home: '首页',
+  management: '管理中心',
+  data: '数据分析',
+  settings: '系统设置',
+};
+
+// 路由到页面名称的映射
+const pathToPageName: Record<string, string> = {
+  '/dashboard': '仪表盘',
+  '/users': '用户管理',
+  '/users/vip': 'VIP用户',
+  '/game-data': '道具管理',
+  '/game-data/levels': '关卡管理',
+  '/activities': '活动管理',
+  '/statistics': '数据统计',
+  '/settings': '系统设置',
+};
+
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -91,6 +111,19 @@ const AdminLayout = () => {
   const handleSideNavSelect = (data: { itemKey: string }) => {
     navigate(data.itemKey);
   };
+
+  // 生成面包屑数据
+  const breadcrumbItems = useMemo(() => {
+    const topNavKey = pathToTopNav[location.pathname] || 'home';
+    const topNavName = topNavNameMap[topNavKey];
+    const pageName = pathToPageName[location.pathname];
+
+    const items = [{ name: topNavName }];
+    if (pageName && pageName !== topNavName) {
+      items.push({ name: pageName });
+    }
+    return items;
+  }, [location.pathname]);
 
   return (
     <div className={styles.frame}>
@@ -146,7 +179,14 @@ const AdminLayout = () => {
           className={styles.sideNav}
         />
         <div className={styles.content}>
-          <Outlet />
+          <Breadcrumb className={styles.breadcrumb}>
+            {breadcrumbItems.map((item, index) => (
+              <Breadcrumb.Item key={index}>{item.name}</Breadcrumb.Item>
+            ))}
+          </Breadcrumb>
+          <div className={styles.pageContent}>
+            <Outlet />
+          </div>
         </div>
       </div>
     </div>

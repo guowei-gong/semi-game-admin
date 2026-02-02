@@ -1,7 +1,5 @@
-import { Card, Row, Col, Typography, Descriptions } from '@douyinfe/semi-ui-19';
+import { Card, Row, Col, Descriptions } from '@douyinfe/semi-ui-19';
 import { IconUser, IconApps, IconActivity, IconCoinMoney } from '@douyinfe/semi-icons';
-
-const { Title } = Typography;
 
 interface StatCardProps {
   title: string;
@@ -43,8 +41,6 @@ const Dashboard = () => {
 
   return (
     <div>
-      <Title heading={4} style={{ marginBottom: 24 }}>仪表盘</Title>
-
       <Row gutter={[16, 16]}>
         {stats.map((stat, index) => (
           <Col xs={24} sm={12} lg={6} key={index}>

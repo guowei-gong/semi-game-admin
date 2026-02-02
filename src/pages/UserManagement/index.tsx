@@ -6,14 +6,11 @@ import {
   Input,
   Tag,
   Space,
-  Typography,
   Avatar,
   Popconfirm,
   Toast
 } from '@douyinfe/semi-ui-19';
 import { IconSearch, IconPlus, IconDelete, IconEdit } from '@douyinfe/semi-icons';
-
-const { Title } = Typography;
 
 interface User {
   id: number;
@@ -132,8 +129,6 @@ const UserManagement = () => {
 
   return (
     <div>
-      <Title heading={4} style={{ marginBottom: 24 }}>用户管理</Title>
-
       <Card>
         <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
           <Input

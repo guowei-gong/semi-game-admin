@@ -4,7 +4,6 @@ import {
   Table,
   Tabs,
   TabPane,
-  Typography,
   Tag,
   Button,
   Space,
@@ -12,8 +11,6 @@ import {
   Select
 } from '@douyinfe/semi-ui-19';
 import { IconSearch, IconPlus, IconEdit, IconDelete } from '@douyinfe/semi-icons';
-
-const { Title } = Typography;
 
 interface GameItem {
   id: number;
@@ -155,8 +152,6 @@ const GameData = () => {
 
   return (
     <div>
-      <Title heading={4} style={{ marginBottom: 24 }}>游戏数据</Title>
-
       <Card>
         <Tabs>
           <TabPane tab="道具管理" itemKey="items">
