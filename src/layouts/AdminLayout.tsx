@@ -1,18 +1,23 @@
 import { useState, useMemo } from 'react';
-import { Nav, Avatar, Tabs, TabPane, Dropdown } from '@douyinfe/semi-ui-19';
+import { Nav, Avatar, Dropdown } from '@douyinfe/semi-ui-19';
 import {
-  IconHome,
   IconUser,
-  IconApps,
   IconSetting,
   IconExit,
   IconBell,
   IconHelpCircle,
   IconSemiLogo,
-  IconGift,
-  IconUserGroup,
-  IconHistogram
 } from '@douyinfe/semi-icons';
+import {
+  IconIntro,
+  IconHeart,
+  IconCalendar,
+  IconCheckbox,
+  IconRadio,
+  IconList,
+  IconToast,
+  IconChangelog,
+} from '@douyinfe/semi-icons-lab';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import styles from './AdminLayout.module.scss';
 
@@ -24,23 +29,23 @@ const topNavItems = [
   { itemKey: 'settings', text: '系统设置' },
 ];
 
-// 侧边 Tab 配置（根据顶部导航分组）
-const sideTabsConfig: Record<string, { key: string; tab: string; icon: React.ReactNode; path: string }[]> = {
+// 侧边导航配置（根据顶部导航分组）
+const sideNavConfig: Record<string, { itemKey: string; text: string; icon: React.ReactNode }[]> = {
   home: [
-    { key: '/dashboard', tab: '仪表盘', icon: <IconHome />, path: '/dashboard' },
+    { itemKey: '/dashboard', text: '仪表盘', icon: <IconIntro className={styles.navIcon} /> },
   ],
   management: [
-    { key: '/users', tab: '用户管理', icon: <IconUserGroup />, path: '/users' },
-    { key: '/users/vip', tab: 'VIP用户', icon: <IconUser />, path: '/users/vip' },
-    { key: '/game-data', tab: '道具管理', icon: <IconApps />, path: '/game-data' },
-    { key: '/game-data/levels', tab: '关卡管理', icon: <IconApps />, path: '/game-data/levels' },
-    { key: '/activities', tab: '活动管理', icon: <IconGift />, path: '/activities' },
+    { itemKey: '/users', text: '用户管理', icon: <IconHeart className={styles.navIcon} /> },
+    { itemKey: '/users/vip', text: 'VIP用户', icon: <IconRadio className={styles.navIcon} /> },
+    { itemKey: '/game-data', text: '道具管理', icon: <IconCalendar className={styles.navIcon} /> },
+    { itemKey: '/game-data/levels', text: '关卡管理', icon: <IconCheckbox className={styles.navIcon} /> },
+    { itemKey: '/activities', text: '活动管理', icon: <IconList className={styles.navIcon} /> },
   ],
   data: [
-    { key: '/statistics', tab: '数据统计', icon: <IconHistogram />, path: '/statistics' },
+    { itemKey: '/statistics', text: '数据统计', icon: <IconChangelog className={styles.navIcon} /> },
   ],
   settings: [
-    { key: '/settings', tab: '系统设置', icon: <IconSetting />, path: '/settings' },
+    { itemKey: '/settings', text: '系统设置', icon: <IconToast className={styles.navIcon} /> },
   ],
 };
 
@@ -67,24 +72,24 @@ const AdminLayout = () => {
 
   const [activeTopNav, setActiveTopNav] = useState(currentTopNav);
 
-  // 当前侧边 Tab 列表
-  const currentSideTabs = useMemo(() => {
-    return sideTabsConfig[activeTopNav] || [];
+  // 当前侧边导航列表
+  const currentSideNavItems = useMemo(() => {
+    return sideNavConfig[activeTopNav] || [];
   }, [activeTopNav]);
 
   // 处理顶部导航切换
   const handleTopNavSelect = (data: { itemKey: string }) => {
     setActiveTopNav(data.itemKey as string);
     // 切换到该分类的第一个页面
-    const tabs = sideTabsConfig[data.itemKey];
-    if (tabs && tabs.length > 0) {
-      navigate(tabs[0].path);
+    const items = sideNavConfig[data.itemKey];
+    if (items && items.length > 0) {
+      navigate(items[0].itemKey);
     }
   };
 
-  // 处理侧边 Tab 切换
-  const handleTabChange = (activeKey: string) => {
-    navigate(activeKey);
+  // 处理侧边导航切换
+  const handleSideNavSelect = (data: { itemKey: string }) => {
+    navigate(data.itemKey);
   };
 
   return (
@@ -99,8 +104,8 @@ const AdminLayout = () => {
         }}
         footer={
           <div className={styles.navFooter}>
-            <IconHelpCircle size="large" className={styles.navIcon} />
-            <IconBell size="large" className={styles.navIcon} />
+            <IconHelpCircle size="large" className={styles.headerIcon} />
+            <IconBell size="large" className={styles.headerIcon} />
             <Dropdown
               position="bottomRight"
               render={
@@ -126,35 +131,21 @@ const AdminLayout = () => {
             </Dropdown>
           </div>
         }
-        className={styles.nav}
+        className={styles.topNav}
       >
         {topNavItems.map(item => (
           <Nav.Item key={item.itemKey} itemKey={item.itemKey} text={item.text} />
         ))}
       </Nav>
-      <div className={styles.content}>
-        <Tabs
-          tabPosition="left"
-          activeKey={location.pathname}
-          onChange={handleTabChange}
-          type="button"
-          size="large"
-          className={styles.tabs}
-        >
-          {currentSideTabs.map(tab => (
-            <TabPane
-              key={tab.key}
-              tab={
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {tab.icon}
-                  {tab.tab}
-                </span>
-              }
-              itemKey={tab.key}
-            />
-          ))}
-        </Tabs>
-        <div className={styles.mainContent}>
+      <div className={styles.main}>
+        <Nav
+          mode="vertical"
+          selectedKeys={[location.pathname]}
+          onSelect={handleSideNavSelect}
+          items={currentSideNavItems}
+          className={styles.sideNav}
+        />
+        <div className={styles.content}>
           <Outlet />
         </div>
       </div>
