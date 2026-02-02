@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Nav, Avatar, Dropdown, Breadcrumb, Typography } from '@douyinfe/semi-ui-19';
+import { useState, useMemo, useEffect } from 'react';
+import { Nav, Avatar, Dropdown, Breadcrumb, Button } from '@douyinfe/semi-ui-19';
 import {
   IconUser,
   IconSetting,
@@ -7,6 +7,8 @@ import {
   IconBell,
   IconHelpCircle,
   IconSemiLogo,
+  IconSun,
+  IconMoon,
 } from '@douyinfe/semi-icons';
 import {
   IconIntro,
@@ -77,6 +79,27 @@ const AdminLayout = () => {
 
   const [activeTopNav, setActiveTopNav] = useState(currentTopNav);
   const [sideNavCollapsed, setSideNavCollapsed] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    // 初始化时检查本地存储或系统偏好
+    const saved = localStorage.getItem('theme-mode');
+    if (saved) return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // 切换暗色模式
+  useEffect(() => {
+    const body = document.body;
+    if (darkMode) {
+      body.setAttribute('theme-mode', 'dark');
+    } else {
+      body.removeAttribute('theme-mode');
+    }
+    localStorage.setItem('theme-mode', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(prev => !prev);
+  };
 
   // 当前侧边导航列表
   const currentSideNavItems = useMemo(() => {
@@ -123,6 +146,13 @@ const AdminLayout = () => {
         }}
         footer={
           <div className={styles.navFooter}>
+            <Button
+              theme="borderless"
+              icon={darkMode ? <IconSun size="large" /> : <IconMoon size="large" />}
+              onClick={toggleDarkMode}
+              className={styles.headerIcon}
+              aria-label={darkMode ? '切换到亮色模式' : '切换到暗色模式'}
+            />
             <IconHelpCircle size="large" className={styles.headerIcon} />
             <IconBell size="large" className={styles.headerIcon} />
             <Dropdown
