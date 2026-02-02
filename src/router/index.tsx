@@ -3,6 +3,7 @@ import AdminLayout from '../layouts/AdminLayout';
 import Dashboard from '../pages/Dashboard';
 import UserManagement from '../pages/UserManagement';
 import GameData from '../pages/GameData';
+import HotUpdate from '../pages/HotUpdate';
 import Login from '../pages/Login';
 
 const router = createBrowserRouter([
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
       {
         path: 'game-data',
         element: <GameData />,
+      },
+      {
+        path: 'hot-update',
+        element: <HotUpdate />,
       },
       {
         path: 'settings',

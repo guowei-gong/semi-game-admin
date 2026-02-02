@@ -12,37 +12,29 @@ import {
   IconIntro,
   IconHeart,
   IconCalendar,
-  IconCheckbox,
-  IconRadio,
-  IconList,
   IconToast,
-  IconChangelog,
+  IconConfig,
 } from '@douyinfe/semi-icons-lab';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import styles from './AdminLayout.module.scss';
 
-// 顶部导航配置
+// 顶部导航配置（仅保留有页面的入口）
 const topNavItems = [
   { itemKey: 'home', text: '首页' },
   { itemKey: 'management', text: '管理中心' },
-  { itemKey: 'data', text: '数据分析' },
   { itemKey: 'settings', text: '系统设置' },
 ];
 
 // 侧边导航配置（根据顶部导航分组）
+// 注：仅保留已创建页面的入口
 const sideNavConfig: Record<string, { itemKey: string; text: string; icon: React.ReactNode }[]> = {
   home: [
     { itemKey: '/dashboard', text: '仪表盘', icon: <IconIntro className={styles.navIcon} /> },
   ],
   management: [
     { itemKey: '/users', text: '用户管理', icon: <IconHeart className={styles.navIcon} /> },
-    { itemKey: '/users/vip', text: 'VIP用户', icon: <IconRadio className={styles.navIcon} /> },
     { itemKey: '/game-data', text: '道具管理', icon: <IconCalendar className={styles.navIcon} /> },
-    { itemKey: '/game-data/levels', text: '关卡管理', icon: <IconCheckbox className={styles.navIcon} /> },
-    { itemKey: '/activities', text: '活动管理', icon: <IconList className={styles.navIcon} /> },
-  ],
-  data: [
-    { itemKey: '/statistics', text: '数据统计', icon: <IconChangelog className={styles.navIcon} /> },
+    { itemKey: '/hot-update', text: '热更新', icon: <IconConfig className={styles.navIcon} /> },
   ],
   settings: [
     { itemKey: '/settings', text: '系统设置', icon: <IconToast className={styles.navIcon} /> },
@@ -53,11 +45,8 @@ const sideNavConfig: Record<string, { itemKey: string; text: string; icon: React
 const pathToTopNav: Record<string, string> = {
   '/dashboard': 'home',
   '/users': 'management',
-  '/users/vip': 'management',
   '/game-data': 'management',
-  '/game-data/levels': 'management',
-  '/activities': 'management',
-  '/statistics': 'data',
+  '/hot-update': 'management',
   '/settings': 'settings',
 };
 
@@ -65,7 +54,6 @@ const pathToTopNav: Record<string, string> = {
 const topNavNameMap: Record<string, string> = {
   home: '首页',
   management: '管理中心',
-  data: '数据分析',
   settings: '系统设置',
 };
 
@@ -73,11 +61,8 @@ const topNavNameMap: Record<string, string> = {
 const pathToPageName: Record<string, string> = {
   '/dashboard': '仪表盘',
   '/users': '用户管理',
-  '/users/vip': 'VIP用户',
   '/game-data': '道具管理',
-  '/game-data/levels': '关卡管理',
-  '/activities': '活动管理',
-  '/statistics': '数据统计',
+  '/hot-update': '热更新',
   '/settings': '系统设置',
 };
 
@@ -91,6 +76,7 @@ const AdminLayout = () => {
   }, [location.pathname]);
 
   const [activeTopNav, setActiveTopNav] = useState(currentTopNav);
+  const [sideNavCollapsed, setSideNavCollapsed] = useState(false);
 
   // 当前侧边导航列表
   const currentSideNavItems = useMemo(() => {
@@ -176,6 +162,9 @@ const AdminLayout = () => {
           selectedKeys={[location.pathname]}
           onSelect={handleSideNavSelect}
           items={currentSideNavItems}
+          isCollapsed={sideNavCollapsed}
+          onCollapseChange={setSideNavCollapsed}
+          footer={{ collapseButton: true }}
           className={styles.sideNav}
         />
         <div className={styles.content}>
