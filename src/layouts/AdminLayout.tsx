@@ -1,14 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Nav, Avatar, Dropdown, Breadcrumb, Button } from '@douyinfe/semi-ui-19';
+import { Nav, Avatar, Dropdown, Button, Breadcrumb } from '@douyinfe/semi-ui-19';
 import {
   IconUser,
   IconSetting,
   IconExit,
-  IconBell,
-  IconHelpCircle,
   IconSemiLogo,
   IconSun,
   IconMoon,
+  IconChevronRight,
 } from '@douyinfe/semi-icons';
 import {
   IconIntro,
@@ -20,31 +19,30 @@ import {
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import styles from './AdminLayout.module.scss';
 
-// 顶部导航配置（仅保留有页面的入口）
-const topNavItems = [
-  { itemKey: 'home', text: '首页' },
-  { itemKey: 'management', text: '管理中心' },
-  { itemKey: 'settings', text: '系统设置' },
+// 一级导航配置（图标导航栏）
+const primaryNavItems = [
+  { itemKey: 'home', text: '首页', icon: <IconIntro className={styles.primaryIcon} /> },
+  { itemKey: 'management', text: '管理中心', icon: <IconConfig className={styles.primaryIcon} /> },
+  { itemKey: 'settings', text: '系统设置', icon: <IconToast className={styles.primaryIcon} /> },
 ];
 
-// 侧边导航配置（根据顶部导航分组）
-// 注：仅保留已创建页面的入口
-const sideNavConfig: Record<string, { itemKey: string; text: string; icon: React.ReactNode }[]> = {
+// 二级导航配置（根据一级导航分组）
+const secondaryNavConfig: Record<string, { itemKey: string; text: string; icon: React.ReactNode }[]> = {
   home: [
-    { itemKey: '/dashboard', text: '仪表盘', icon: <IconIntro className={styles.navIcon} /> },
+    { itemKey: '/dashboard', text: '仪表盘', icon: <IconIntro className={styles.secondaryIcon} /> },
   ],
   management: [
-    { itemKey: '/users', text: '用户管理', icon: <IconHeart className={styles.navIcon} /> },
-    { itemKey: '/game-data', text: '道具管理', icon: <IconCalendar className={styles.navIcon} /> },
-    { itemKey: '/hot-update', text: '热更新', icon: <IconConfig className={styles.navIcon} /> },
+    { itemKey: '/users', text: '用户管理', icon: <IconHeart className={styles.secondaryIcon} /> },
+    { itemKey: '/game-data', text: '道具管理', icon: <IconCalendar className={styles.secondaryIcon} /> },
+    { itemKey: '/hot-update', text: '热更新', icon: <IconConfig className={styles.secondaryIcon} /> },
   ],
   settings: [
-    { itemKey: '/settings', text: '系统设置', icon: <IconToast className={styles.navIcon} /> },
+    { itemKey: '/settings', text: '系统设置', icon: <IconToast className={styles.secondaryIcon} /> },
   ],
 };
 
-// 路由到顶部导航的映射
-const pathToTopNav: Record<string, string> = {
+// 路由到一级导航的映射
+const pathToPrimaryNav: Record<string, string> = {
   '/dashboard': 'home',
   '/users': 'management',
   '/game-data': 'management',
@@ -52,8 +50,8 @@ const pathToTopNav: Record<string, string> = {
   '/settings': 'settings',
 };
 
-// 顶部导航名称映射
-const topNavNameMap: Record<string, string> = {
+// 一级导航名称映射
+const primaryNavNameMap: Record<string, string> = {
   home: '首页',
   management: '管理中心',
   settings: '系统设置',
@@ -72,21 +70,17 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 根据当前路径确定顶部导航选中项
-  const currentTopNav = useMemo(() => {
-    return pathToTopNav[location.pathname] || 'home';
+  const currentPrimaryNav = useMemo(() => {
+    return pathToPrimaryNav[location.pathname] || 'home';
   }, [location.pathname]);
 
-  const [activeTopNav, setActiveTopNav] = useState(currentTopNav);
-  const [sideNavCollapsed, setSideNavCollapsed] = useState(false);
+  const [activePrimaryNav, setActivePrimaryNav] = useState(currentPrimaryNav);
   const [darkMode, setDarkMode] = useState(() => {
-    // 初始化时检查本地存储或系统偏好
     const saved = localStorage.getItem('theme-mode');
     if (saved) return saved === 'dark';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  // 切换暗色模式
   useEffect(() => {
     const body = document.body;
     if (darkMode) {
@@ -101,34 +95,37 @@ const AdminLayout = () => {
     setDarkMode(prev => !prev);
   };
 
-  // 当前侧边导航列表
-  const currentSideNavItems = useMemo(() => {
-    return sideNavConfig[activeTopNav] || [];
-  }, [activeTopNav]);
+  // 当前二级导航列表
+  const currentSecondaryItems = useMemo(() => {
+    return secondaryNavConfig[activePrimaryNav] || [];
+  }, [activePrimaryNav]);
 
-  // 处理顶部导航切换
-  const handleTopNavSelect = (data: { itemKey: string }) => {
-    setActiveTopNav(data.itemKey as string);
-    // 切换到该分类的第一个页面
-    const items = sideNavConfig[data.itemKey];
+  // 处理一级导航切换
+  const handlePrimaryNavSelect = (data: { itemKey: string }) => {
+    setActivePrimaryNav(data.itemKey as string);
+    const items = secondaryNavConfig[data.itemKey];
     if (items && items.length > 0) {
       navigate(items[0].itemKey);
     }
   };
 
-  // 处理侧边导航切换
-  const handleSideNavSelect = (data: { itemKey: string }) => {
+  // 处理二级导航切换
+  const handleSecondaryNavSelect = (data: { itemKey: string }) => {
     navigate(data.itemKey);
   };
 
-  // 生成面包屑数据
-  const breadcrumbItems = useMemo(() => {
-    const topNavKey = pathToTopNav[location.pathname] || 'home';
-    const topNavName = topNavNameMap[topNavKey];
-    const pageName = pathToPageName[location.pathname];
+  // 页面标题
+  const pageTitle = useMemo(() => {
+    return pathToPageName[location.pathname] || '';
+  }, [location.pathname]);
 
-    const items = [{ name: topNavName }];
-    if (pageName && pageName !== topNavName) {
+  // 面包屑数据
+  const breadcrumbItems = useMemo(() => {
+    const primaryKey = pathToPrimaryNav[location.pathname] || 'home';
+    const primaryName = primaryNavNameMap[primaryKey];
+    const pageName = pathToPageName[location.pathname];
+    const items = [{ name: primaryName }];
+    if (pageName && pageName !== primaryName) {
       items.push({ name: pageName });
     }
     return items;
@@ -136,27 +133,30 @@ const AdminLayout = () => {
 
   return (
     <div className={styles.frame}>
+      {/* 一级导航：收起的图标栏 */}
       <Nav
-        mode="horizontal"
-        selectedKeys={[activeTopNav]}
-        onSelect={handleTopNavSelect}
+        isCollapsed={true}
+        mode="vertical"
+        selectedKeys={[activePrimaryNav]}
+        onSelect={handlePrimaryNavSelect}
         header={{
-          logo: <IconSemiLogo className={styles.semiIconsSemiLogo} />,
-          text: "游戏管理后台",
+          logo: (
+            <div className={styles.logoWrap}>
+              <IconSemiLogo className={styles.semiIconsSemiLogo} />
+            </div>
+          ),
         }}
         footer={
-          <div className={styles.navFooter}>
+          <div className={styles.primaryFooter}>
             <Button
               theme="borderless"
-              icon={darkMode ? <IconSun size="large" /> : <IconMoon size="large" />}
+              icon={darkMode ? <IconSun /> : <IconMoon />}
               onClick={toggleDarkMode}
-              className={styles.headerIcon}
+              className={styles.primaryFooterBtn}
               aria-label={darkMode ? '切换到亮色模式' : '切换到暗色模式'}
             />
-            <IconHelpCircle size="large" className={styles.headerIcon} />
-            <IconBell size="large" className={styles.headerIcon} />
             <Dropdown
-              position="bottomRight"
+              position="rightBottom"
               render={
                 <Dropdown.Menu>
                   <Dropdown.Item icon={<IconUser />}>个人信息</Dropdown.Item>
@@ -168,44 +168,51 @@ const AdminLayout = () => {
                 </Dropdown.Menu>
               }
             >
-              <span className={styles.userInfo}>
-                <Avatar
-                  size="small"
-                  color="blue"
-                  className={styles.avatar}
-                >
+              <span>
+                <Avatar size="small" color="blue" className={styles.primaryAvatar}>
                   管
                 </Avatar>
               </span>
             </Dropdown>
           </div>
         }
-        className={styles.topNav}
+        className={styles.primaryNav}
       >
-        {topNavItems.map(item => (
-          <Nav.Item key={item.itemKey} itemKey={item.itemKey} text={item.text} />
+        {primaryNavItems.map(item => (
+          <Nav.Item
+            key={item.itemKey}
+            itemKey={item.itemKey}
+            text={item.text}
+            icon={item.icon}
+          />
         ))}
       </Nav>
-      <div className={styles.main}>
-        <Nav
-          mode="vertical"
-          selectedKeys={[location.pathname]}
-          onSelect={handleSideNavSelect}
-          items={currentSideNavItems}
-          isCollapsed={sideNavCollapsed}
-          onCollapseChange={setSideNavCollapsed}
-          footer={{ collapseButton: true }}
-          className={styles.sideNav}
-        />
-        <div className={styles.content}>
-          <Breadcrumb className={styles.breadcrumb}>
-            {breadcrumbItems.map((item, index) => (
-              <Breadcrumb.Item key={index}>{item.name}</Breadcrumb.Item>
-            ))}
-          </Breadcrumb>
-          <div className={styles.pageContent}>
-            <Outlet />
-          </div>
+
+      {/* 二级导航：展开的侧边栏 */}
+      <Nav
+        mode="vertical"
+        selectedKeys={[location.pathname]}
+        onSelect={handleSecondaryNavSelect}
+        items={currentSecondaryItems}
+        className={styles.secondaryNav}
+      />
+
+      {/* 内容区域 */}
+      <div className={styles.content}>
+        <Breadcrumb separator={<IconChevronRight size="small" />} className={styles.breadcrumb}>
+          {breadcrumbItems.map((item, index) => (
+            <Breadcrumb.Item key={index}>
+              {index === breadcrumbItems.length - 1 ? (
+                <span className={styles.breadcrumbActive}>{item.name}</span>
+              ) : (
+                item.name
+              )}
+            </Breadcrumb.Item>
+          ))}
+        </Breadcrumb>
+        <p className={styles.pageTitle}>{pageTitle}</p>
+        <div className={styles.pageContent}>
+          <Outlet />
         </div>
       </div>
     </div>

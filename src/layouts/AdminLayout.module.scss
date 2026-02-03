@@ -1,91 +1,99 @@
 .frame {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   background: var(--semi-color-bg-0);
   width: 100%;
   height: 100vh;
   overflow: hidden;
 
-  .topNav {
+  // 一级导航：收起的图标栏
+  .primaryNav {
     flex-shrink: 0;
-    align-self: stretch;
-    height: 60px;
+    width: 60px;
+    border-right: 1px solid var(--semi-color-border);
 
-    .semiIconsSemiLogo {
-      color: var(--semi-color-text-0);
-      font-size: 36px;
+    .logoWrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .semiIconsSemiLogo {
+        color: var(--semi-color-text-0);
+        font-size: 36px;
+      }
     }
 
-    .navFooter {
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-start;
-      column-gap: 16px;
-      color: var(--semi-color-text-2);
-      font-size: 20px;
-
-      .headerIcon {
-        color: var(--semi-color-text-2);
-        font-size: 20px;
-        cursor: pointer;
-        transition: color 0.2s;
-
-        &:hover {
-          color: var(--semi-color-text-0);
-        }
-      }
-
-      .avatar {
-        flex-shrink: 0;
-        width: 32px;
-        height: 32px;
-        cursor: pointer;
-      }
-
-      .userInfo {
-        display: inline-flex;
-        align-items: center;
-        cursor: pointer;
-        gap: 8px;
-      }
+    .primaryIcon {
+      width: 20px;
+      height: 20px;
     }
   }
 
-  .main {
+  .primaryFooter {
     display: flex;
-    flex: 1;
-    align-items: stretch;
-    align-self: stretch;
-    overflow: hidden;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
 
-    .sideNav {
-      flex-shrink: 0;
-      height: 100%;
+    .primaryFooterBtn {
+      color: var(--semi-color-text-2);
 
-      .navIcon {
-        width: 20px;
-        height: 20px;
+      &:hover {
+        color: var(--semi-color-text-0);
       }
     }
 
-    .content {
+    .primaryAvatar {
+      cursor: pointer;
+    }
+  }
+
+  // 二级导航：展开的侧边栏
+  .secondaryNav {
+    flex-shrink: 0;
+    width: 240px;
+    border-right: 1px solid var(--semi-color-border);
+
+    .secondaryIcon {
+      color: rgb(var(--semi-grey-3));
+      font-size: 20px;
+    }
+  }
+
+  // 内容区域
+  .content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 24px 30px;
+    overflow: auto;
+    gap: 12px;
+
+    .breadcrumb {
+      flex-shrink: 0;
+    }
+
+    .breadcrumbActive {
+      background: var(--semi-color-primary-light-default);
+      color: var(--semi-color-primary);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .pageTitle {
+      flex-shrink: 0;
+      margin: 0;
+      line-height: 28px;
+      letter-spacing: -0.6px;
+      color: var(--semi-color-text-0);
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .pageContent {
       flex: 1;
-      padding: 24px;
       overflow: auto;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-
-      .breadcrumb {
-        flex-shrink: 0;
-        margin-bottom: 16px;
-      }
-
-      .pageContent {
-        flex: 1;
-        overflow: auto;
-      }
     }
   }
 }
