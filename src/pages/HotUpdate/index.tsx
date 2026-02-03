@@ -540,6 +540,7 @@ const HotUpdate = () => {
             </div>
 
             {/* 底部操作区域 */}
+            <div className={styles.footerDivider} />
             <div className={styles.confirmFooter}>
               <Button
                 theme="outline"
@@ -567,9 +568,7 @@ const HotUpdate = () => {
 
       case 'execute':
         return (
-          <Card className={styles.stepCard}>
-            <Title heading={5} style={{ marginBottom: 16 }}>执行热更新</Title>
-
+          <div className={styles.confirmContainer}>
             <div className={styles.executionContainer}>
               {executionSteps.map((step, index) => (
                 <div key={step.key} className={styles.executionItem}>
@@ -614,16 +613,34 @@ const HotUpdate = () => {
             </div>
 
             {!isExecuting && executionSteps.every(s => s.status === 'success') && (
-              <div style={{ marginTop: 16 }}>
-                <Banner
-                  type="success"
-                  description="热更新完成！测试服已成功更新。"
-                  style={{ marginBottom: 16 }}
-                />
-                <Button type="primary" theme="solid" onClick={handleReset}>开始新的更新</Button>
-              </div>
+              <Banner
+                type="success"
+                description="热更新完成！测试服已成功更新。"
+              />
             )}
-          </Card>
+
+            {/* 底部操作区域 */}
+            <div className={styles.footerDivider} />
+            <div className={styles.confirmFooter}>
+              <Button
+                theme="outline"
+                icon={<IconArrowLeft />}
+                disabled={isExecuting}
+                onClick={() => setCurrentPage('confirm')}
+              >
+                返回
+              </Button>
+              {!isExecuting && executionSteps.every(s => s.status === 'success') ? (
+                <Button type="primary" theme="solid" size="large" onClick={handleReset}>
+                  开始新的更新
+                </Button>
+              ) : (
+                <Button type="primary" theme="solid" size="large" loading={isExecuting} disabled>
+                  执行中...
+                </Button>
+              )}
+            </div>
+          </div>
         );
 
       default:
