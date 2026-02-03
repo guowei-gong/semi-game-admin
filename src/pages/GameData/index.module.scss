@@ -1,0 +1,59 @@
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  :global {
+    .semi-input-wrapper {
+      border: 1px solid var(--semi-color-border);
+      background-color: var(--semi-color-bg-2);
+
+      &:hover {
+        border-color: var(--semi-color-primary-hover);
+      }
+
+      &:focus-within {
+        border-color: var(--semi-color-primary);
+      }
+    }
+
+    .semi-select {
+      border: 1px solid var(--semi-color-border);
+      border-radius: var(--semi-border-radius-small);
+
+      &:hover {
+        border-color: var(--semi-color-primary-hover);
+      }
+
+      &:focus-within {
+        border-color: var(--semi-color-primary);
+      }
+    }
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.table {
+  :global {
+    .semi-table {
+      border: 1px solid var(--semi-color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .semi-table-thead > .semi-table-row > .semi-table-row-head {
+      background: var(--semi-color-fill-0);
+    }
+
+    .semi-table-tbody > .semi-table-row > .semi-table-row-cell {
+      border-bottom: 1px solid var(--semi-color-border);
+    }
+
+    .semi-table-tbody > .semi-table-row:last-child > .semi-table-row-cell {
+      border-bottom: none;
+    }
+  }
+}

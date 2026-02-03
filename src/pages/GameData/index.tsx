@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Card,
   Table,
   Tabs,
   TabPane,
@@ -11,6 +10,7 @@ import {
   Select
 } from '@douyinfe/semi-ui-19';
 import { IconSearch, IconPlus, IconEdit, IconDelete } from '@douyinfe/semi-icons';
+import styles from './index.module.scss';
 
 interface GameItem {
   id: number;
@@ -152,64 +152,67 @@ const GameData = () => {
 
   return (
     <div>
-      <Card>
-        <Tabs>
-          <TabPane tab="道具管理" itemKey="items">
-            <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
-              <Input
-                prefix={<IconSearch />}
-                placeholder="搜索道具名称"
-                style={{ width: 250 }}
-                value={itemSearchText}
-                onChange={setItemSearchText}
-              />
-              <Select
-                placeholder="筛选类型"
-                style={{ width: 150 }}
-                value={selectedType}
-                onChange={setSelectedType}
-                optionList={[
-                  { value: '', label: '全部' },
-                  { value: '消耗品', label: '消耗品' },
-                  { value: '武器', label: '武器' },
-                  { value: '装备', label: '装备' },
-                ]}
-              />
-              <div style={{ flex: 1 }} />
-              <Button type="primary" icon={<IconPlus />}>
-                添加道具
-              </Button>
-            </div>
-            <Table
-              columns={itemColumns}
-              dataSource={filteredItems}
-              rowKey="id"
-              pagination={{ pageSize: 10, showTotal: true }}
+      <Tabs>
+        <TabPane tab="道具管理" itemKey="items">
+          <div className={styles.toolbar}>
+            <Input
+              prefix={<IconSearch />}
+              placeholder="搜索道具名称"
+              style={{ width: 250 }}
+              value={itemSearchText}
+              onChange={setItemSearchText}
+              showClear
             />
-          </TabPane>
+            <Select
+              placeholder="筛选类型"
+              style={{ width: 150 }}
+              value={selectedType}
+              onChange={setSelectedType}
+              optionList={[
+                { value: '', label: '全部' },
+                { value: '消耗品', label: '消耗品' },
+                { value: '武器', label: '武器' },
+                { value: '装备', label: '装备' },
+              ]}
+            />
+            <div className={styles.spacer} />
+            <Button type="primary" theme="solid" icon={<IconPlus />}>
+              添加道具
+            </Button>
+          </div>
+          <Table
+            columns={itemColumns}
+            dataSource={filteredItems}
+            rowKey="id"
+            pagination={{ pageSize: 10, showTotal: true }}
+            className={styles.table}
+          />
+        </TabPane>
 
-          <TabPane tab="关卡管理" itemKey="levels">
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-              <Input
-                prefix={<IconSearch />}
-                placeholder="搜索关卡名称"
-                style={{ width: 250 }}
-                value={levelSearchText}
-                onChange={setLevelSearchText}
-              />
-              <Button type="primary" icon={<IconPlus />}>
-                添加关卡
-              </Button>
-            </div>
-            <Table
-              columns={levelColumns}
-              dataSource={filteredLevels}
-              rowKey="id"
-              pagination={{ pageSize: 10, showTotal: true }}
+        <TabPane tab="关卡管理" itemKey="levels">
+          <div className={styles.toolbar}>
+            <Input
+              prefix={<IconSearch />}
+              placeholder="搜索关卡名称"
+              style={{ width: 250 }}
+              value={levelSearchText}
+              onChange={setLevelSearchText}
+              showClear
             />
-          </TabPane>
-        </Tabs>
-      </Card>
+            <div className={styles.spacer} />
+            <Button type="primary" theme="solid" icon={<IconPlus />}>
+              添加关卡
+            </Button>
+          </div>
+          <Table
+            columns={levelColumns}
+            dataSource={filteredLevels}
+            rowKey="id"
+            pagination={{ pageSize: 10, showTotal: true }}
+            className={styles.table}
+          />
+        </TabPane>
+      </Tabs>
     </div>
   );
 };

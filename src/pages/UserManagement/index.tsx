@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Table,
-  Card,
   Button,
   Input,
   Tag,
@@ -11,6 +10,7 @@ import {
   Toast
 } from '@douyinfe/semi-ui-19';
 import { IconSearch, IconPlus, IconDelete, IconEdit } from '@douyinfe/semi-icons';
+import styles from './index.module.scss';
 
 interface User {
   id: number;
@@ -129,32 +129,32 @@ const UserManagement = () => {
 
   return (
     <div>
-      <Card>
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-          <Input
-            prefix={<IconSearch />}
-            placeholder="搜索用户名、昵称或邮箱"
-            style={{ width: 300 }}
-            value={searchText}
-            onChange={setSearchText}
-          />
-          <Button type="primary" icon={<IconPlus />}>
-            添加用户
-          </Button>
-        </div>
-
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showTotal: true,
-            showSizeChanger: true,
-          }}
+      <div className={styles.toolbar}>
+        <Input
+          prefix={<IconSearch />}
+          placeholder="搜索用户名、昵称或邮箱"
+          style={{ width: 300 }}
+          value={searchText}
+          onChange={setSearchText}
+          showClear
         />
-      </Card>
+        <Button type="primary" theme="solid" icon={<IconPlus />}>
+          添加用户
+        </Button>
+      </div>
+
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        rowKey="id"
+        loading={loading}
+        pagination={{
+          pageSize: 10,
+          showTotal: true,
+          showSizeChanger: true,
+        }}
+        className={styles.table}
+      />
     </div>
   );
 };
