@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Card,
   Button,
@@ -16,6 +16,7 @@ import {
   Toast,
   Input,
   Descriptions,
+  Modal,
 } from '@douyinfe/semi-ui-19';
 import {
   IconTickCircle,
@@ -56,93 +57,29 @@ interface ChangeItem {
   type: 'schema' | 'data'; // schema: 结构变更, data: 数据变更
 }
 
-// 模拟检测结果
+// 预检查结果
+interface PreCheckResult {
+  canExecute: boolean;
+  lockedBy?: string;    // 占用人姓名
+  lockedAt?: string;    // 占用开始时间
+}
+
+// 检测结果
 interface DetectResult {
   hasSchemaChange: boolean;
   changes: ChangeItem[];
   configFiles: string[];
 }
 
-// 模拟日志数据
-const mockUploadLogs: LogLine[] = [
-  { time: '00:00:01', content: '开始上传配置文件...', type: 'info' },
-  { time: '00:00:02', content: '检测到 5 个配置文件', type: 'info' },
-  { time: '00:00:03', content: '正在校验 game_config.json...', type: 'info' },
-  { time: '00:00:04', content: '正在校验 item_config.json...', type: 'info' },
-  { time: '00:00:05', content: '正在校验 level_config.json...', type: 'info' },
-  { time: '00:00:06', content: '✓ 所有配置文件校验通过', type: 'success' },
-  { time: '00:00:07', content: '正在上传到测试服务器...', type: 'info' },
-  { time: '00:00:10', content: '✓ 上传完成', type: 'success' },
-];
-
-const mockBuildLogs: LogLine[] = [
-  { time: '00:00:01', content: '检测到表结构变更，开始镜像重建...', type: 'warning' },
-  { time: '00:00:02', content: 'Pulling base image: game-server:latest', type: 'info' },
-  { time: '00:00:05', content: 'Step 1/5: FROM game-server:latest', type: 'info' },
-  { time: '00:00:06', content: 'Step 2/5: COPY config/ /app/config/', type: 'info' },
-  { time: '00:00:07', content: 'Step 3/5: RUN npm run build', type: 'info' },
-  { time: '00:00:15', content: 'Building game logic...', type: 'info' },
-  { time: '00:00:25', content: 'Compiling schemas...', type: 'info' },
-  { time: '00:00:35', content: 'Step 4/5: RUN npm run migrate', type: 'info' },
-  { time: '00:00:40', content: 'Running database migrations...', type: 'info' },
-  { time: '00:00:45', content: 'Step 5/5: CMD ["npm", "start"]', type: 'info' },
-  { time: '00:00:46', content: '✓ 镜像构建完成: game-server:v1.2.3', type: 'success' },
-];
-
-const mockRestartLogs: LogLine[] = [
-  { time: '00:00:01', content: '正在停止当前服务...', type: 'info' },
-  { time: '00:00:03', content: 'Stopping container: game-test-server', type: 'info' },
-  { time: '00:00:05', content: '✓ 服务已停止', type: 'success' },
-  { time: '00:00:06', content: '正在启动新服务...', type: 'info' },
-  { time: '00:00:08', content: 'Starting container with new image...', type: 'info' },
-  { time: '00:00:10', content: 'Health check: waiting...', type: 'info' },
-  { time: '00:00:15', content: 'Health check: passed', type: 'success' },
-  { time: '00:00:16', content: '✓ 服务启动成功，测试服已更新', type: 'success' },
-];
-
-// 更新记录数据
-const historyData = [
-  {
-    id: 1,
-    title: '配置更新成功',
-    time: '2026-02-02 14:32:18',
-    executor: '张策划',
-    commit: 'a1b2c3d4e5f6',
-    status: 'success',
-  },
-  {
-    id: 2,
-    title: '配置更新成功',
-    time: '2026-02-01 10:15:42',
-    executor: '李开发',
-    commit: 'b2c3d4e5f6g7',
-    status: 'success',
-  },
-  {
-    id: 3,
-    title: '配置回滚',
-    time: '2026-01-31 16:28:05',
-    executor: '王运维',
-    commit: 'c3d4e5f6g7h8',
-    status: 'rollback',
-  },
-  {
-    id: 4,
-    title: '配置更新成功',
-    time: '2026-01-30 09:45:33',
-    executor: '张策划',
-    commit: 'd4e5f6g7h8i9',
-    status: 'success',
-  },
-  {
-    id: 5,
-    title: '配置更新失败',
-    time: '2026-01-29 15:22:11',
-    executor: '李开发',
-    commit: 'e5f6g7h8i9j0',
-    status: 'failed',
-  },
-];
+// 更新记录项
+interface HistoryItem {
+  id: number;
+  title: string;
+  time: string;
+  executor: string;
+  commit: string;
+  status: 'success' | 'rollback' | 'failed';
+}
 
 const HotUpdate = () => {
   // 当前页面: detect | confirm | execute
@@ -161,19 +98,74 @@ const HotUpdate = () => {
   const [activeTab, setActiveTab] = useState('history');
   // 搜索关键词
   const [searchKeyword, setSearchKeyword] = useState('');
+  // 预检查加载状态
+  const [isPreChecking, setIsPreChecking] = useState(false);
+  // 更新记录
+  const [historyData, setHistoryData] = useState<HistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  // 日志容器 refs，用于自动滚动
+  const logContainerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // 轮询定时器
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // 当前执行 ID
+  const [executionId, setExecutionId] = useState<string | null>(null);
 
-  // 过滤后的更新记录
-  const filteredHistoryData = searchKeyword
-    ? historyData.filter(item =>
-        item.title.includes(searchKeyword) ||
-        item.executor.includes(searchKeyword) ||
-        item.commit.includes(searchKeyword)
-      )
-    : historyData;
+  // 加载更新记录
+  const fetchHistory = useCallback(async (keyword?: string) => {
+    setHistoryLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (keyword) params.set('keyword', keyword);
+      params.set('page', '1');
+      params.set('pageSize', '20');
+      const res = await fetch(`/api/hot-update/history?${params}`);
+      const json = await res.json();
+      if (json.code === 0) {
+        setHistoryData(json.data.list);
+      }
+    } catch {
+      Toast.error({ content: '加载更新记录失败', duration: 3 });
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
 
-  // 模拟检测表结构
+  // 初始加载更新记录
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
+
+  // 搜索关键词变化时重新加载
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchHistory(searchKeyword || undefined);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchKeyword, fetchHistory]);
+
+  // 日志更新时自动滚动到底部
+  useEffect(() => {
+    for (const step of executionSteps) {
+      if (step.logs.length > 0 && step.expanded) {
+        const el = logContainerRefs.current[step.key];
+        if (el) {
+          el.scrollTop = el.scrollHeight;
+        }
+      }
+    }
+  }, [executionSteps]);
+
+  // 组件卸载时清理轮询
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, []);
+
+  // 检测配置变更
   const handleDetect = async () => {
-    // 检查是否已阅读注意事项
     if (!noticeRead) {
       Toast.warning({ content: '请先阅读并确认注意事项', duration: 3 });
       setActiveTab('notice');
@@ -181,88 +173,167 @@ const HotUpdate = () => {
     }
 
     setIsDetecting(true);
-
-    // 模拟请求延时
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // 模拟检测结果
-    const hasSchemaChange = Math.random() > 0.5;
-    const changes: ChangeItem[] = [
-      { name: 't_item', type: hasSchemaChange ? 'schema' : 'data' },
-      { name: 't_level', type: 'data' },
-      { name: 't_config', type: 'data' },
-    ];
-
-    const result: DetectResult = {
-      hasSchemaChange,
-      changes,
-      configFiles: ['game_config.json', 'item_config.json', 'level_config.json'],
-    };
-    setDetectResult(result);
-    setIsDetecting(false);
-    setCurrentPage('confirm');
+    try {
+      const res = await fetch('/api/hot-update/detect', { method: 'POST' });
+      const json = await res.json();
+      if (json.code === 0) {
+        setDetectResult(json.data);
+        setCurrentPage('confirm');
+      } else {
+        Toast.error({ content: json.message || '检测失败', duration: 3 });
+      }
+    } catch {
+      Toast.error({ content: '检测请求失败，请检查网络连接', duration: 3 });
+    } finally {
+      setIsDetecting(false);
+    }
   };
 
-  // 模拟执行步骤
-  const simulateExecution = async (
-    stepKey: string,
-    logs: LogLine[],
-    updateSteps: (updater: (prev: ExecutionStep[]) => ExecutionStep[]) => void
-  ) => {
-    updateSteps(prev => prev.map(s =>
-      s.key === stepKey ? { ...s, status: 'running' as ExecutionStatus, expanded: true } : s
-    ));
-
-    for (let i = 0; i < logs.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      updateSteps(prev => prev.map(s =>
-        s.key === stepKey ? { ...s, logs: logs.slice(0, i + 1) } : s
-      ));
+  // 轮询执行状态
+  const startPolling = (execId: string) => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
     }
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-    updateSteps(prev => prev.map(s =>
-      s.key === stepKey ? { ...s, status: 'success' as ExecutionStatus, duration: `${(logs.length * 0.3 + 0.5).toFixed(1)}s` } : s
-    ));
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/hot-update/executions/${execId}`);
+        const json = await res.json();
+        if (json.code !== 0) return;
+
+        const data = json.data;
+        const remoteSteps: ExecutionStep[] = data.steps.map((s: ExecutionStep) => ({
+          key: s.key,
+          title: s.title,
+          status: s.status,
+          duration: s.duration ?? undefined,
+          logs: s.logs ?? [],
+          expanded: s.status === 'running' || s.status === 'error',
+        }));
+        setExecutionSteps(remoteSteps);
+
+        if (data.status === 'success' || data.status === 'error') {
+          if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
+          }
+          setIsExecuting(false);
+          if (data.status === 'success') {
+            fetchHistory();
+          }
+        }
+      } catch {
+        // 轮询失败时静默重试
+      }
+    };
+
+    poll();
+    pollingRef.current = setInterval(poll, 1500);
+  };
+
+  // 预检查：验证当前是否可以执行热更新
+  const handlePreCheck = async (): Promise<boolean> => {
+    setIsPreChecking(true);
+    try {
+      const res = await fetch('/api/hot-update/pre-check', { method: 'POST' });
+      const json = await res.json();
+      if (json.code !== 0) {
+        Toast.error({ content: json.message || '预检查失败', duration: 3 });
+        return false;
+      }
+
+      const result: PreCheckResult = json.data;
+      if (!result.canExecute) {
+        Modal.warning({
+          title: '无法执行热更新',
+          content: (
+            <div>
+              <p>当前有其他管理员正在执行热更新操作，请稍后再试。</p>
+              <Descriptions
+                data={[
+                  { key: '占用人', value: result.lockedBy },
+                  { key: '开始时间', value: result.lockedAt },
+                ]}
+                style={{ marginTop: 12 }}
+              />
+            </div>
+          ),
+          okText: '我知道了',
+        });
+        return false;
+      }
+      return true;
+    } catch {
+      Toast.error({ content: '预检查请求失败，请重试', duration: 3 });
+      return false;
+    } finally {
+      setIsPreChecking(false);
+    }
+  };
+
+  // 确认并开始热更新（先预检查，再执行）
+  const handleConfirmAndExecute = async () => {
+    const canProceed = await handlePreCheck();
+    if (!canProceed) return;
+    setCurrentPage('execute');
+    handleExecute();
   };
 
   // 开始执行热更新
   const handleExecute = async () => {
-    const execSteps: ExecutionStep[] = [
-      { key: 'upload', title: '上传配置', status: 'idle', logs: [], expanded: true },
-    ];
+    if (!detectResult) return;
 
-    if (detectResult?.hasSchemaChange) {
-      execSteps.push({ key: 'build', title: '镜像重建', status: 'idle', logs: [], expanded: false });
-    }
-
-    execSteps.push({ key: 'restart', title: '重启服务', status: 'idle', logs: [], expanded: false });
-
-    setExecutionSteps(execSteps);
+    setExecutionSteps([]);
     setIsExecuting(true);
 
     try {
-      await simulateExecution('upload', mockUploadLogs, setExecutionSteps);
-
-      if (detectResult?.hasSchemaChange) {
-        await simulateExecution('build', mockBuildLogs, setExecutionSteps);
+      const res = await fetch('/api/hot-update/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          changes: detectResult.changes,
+          configFiles: detectResult.configFiles,
+          hasSchemaChange: detectResult.hasSchemaChange,
+        }),
+      });
+      const json = await res.json();
+      if (json.code === 0) {
+        const { executionId: execId, steps } = json.data;
+        setExecutionId(execId);
+        // 用后端返回的步骤初始化列表
+        setExecutionSteps(
+          (steps as string[]).map((key: string, i: number) => ({
+            key,
+            title: { upload: '上传配置', build: '镜像重建', restart: '重启服务' }[key] || key,
+            status: 'idle' as ExecutionStatus,
+            logs: [],
+            expanded: i === 0,
+          }))
+        );
+        startPolling(execId);
+      } else {
+        Toast.error({ content: json.message || '执行请求失败', duration: 3 });
+        setIsExecuting(false);
       }
-
-      await simulateExecution('restart', mockRestartLogs, setExecutionSteps);
-    } catch (error) {
-      console.error('执行失败:', error);
-    } finally {
+    } catch {
+      Toast.error({ content: '执行请求失败，请检查网络连接', duration: 3 });
       setIsExecuting(false);
     }
   };
 
   // 重置流程
   const handleReset = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    setExecutionId(null);
     setCurrentPage('detect');
     setDetectResult(null);
     setExecutionSteps([]);
     setIsExecuting(false);
     setNoticeRead(false);
+    fetchHistory();
   };
 
   // 切换执行步骤展开状态
@@ -388,7 +459,8 @@ const HotUpdate = () => {
                       />
                     </div>
                     <List
-                      dataSource={filteredHistoryData}
+                      loading={historyLoading}
+                      dataSource={historyData}
                       emptyContent={<div className={styles.emptyContent}>暂无匹配记录</div>}
                       renderItem={(item) => (
                         <List.Item
@@ -549,18 +621,27 @@ const HotUpdate = () => {
               >
                 返回
               </Button>
-              <Button
-                type="primary"
-                theme="solid"
-                size="large"
-                icon={<IconPlay />}
-                onClick={() => {
-                  setCurrentPage('execute');
-                  handleExecute();
-                }}
-              >
-                确认并开始热更新
-              </Button>
+              {executionId ? (
+                <Button
+                  type="primary"
+                  theme="solid"
+                  size="large"
+                  onClick={() => setCurrentPage('execute')}
+                >
+                  查看运行结果
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  theme="solid"
+                  size="large"
+                  icon={<IconPlay />}
+                  loading={isPreChecking}
+                  onClick={handleConfirmAndExecute}
+                >
+                  确认并开始热更新
+                </Button>
+              )}
             </div>
           </div>
         );
@@ -591,7 +672,10 @@ const HotUpdate = () => {
                     </div>
                   </div>
                   <Collapsible isOpen={step.expanded}>
-                    <div className={styles.logContainer}>
+                    <div
+                      className={styles.logContainer}
+                      ref={(el) => { logContainerRefs.current[step.key] = el; }}
+                    >
                       {step.logs.length === 0 ? (
                         <div className={styles.logEmpty}>等待执行...</div>
                       ) : (
@@ -616,6 +700,13 @@ const HotUpdate = () => {
               <Banner
                 type="success"
                 description="热更新完成！测试服已成功更新。"
+              />
+            )}
+
+            {!isExecuting && executionSteps.some(s => s.status === 'error') && (
+              <Banner
+                type="danger"
+                description="热更新执行失败，请查看日志排查问题。"
               />
             )}
 
