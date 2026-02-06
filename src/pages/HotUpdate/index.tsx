@@ -13,7 +13,7 @@ import {
   Checkbox,
   List,
   Avatar,
-  Toast,
+  Notification,
   Input,
   Descriptions,
   Modal,
@@ -124,7 +124,7 @@ const HotUpdate = () => {
         setHistoryData(json.data.list);
       }
     } catch {
-      Toast.error({ content: '加载更新记录失败', duration: 3 });
+      Notification.error({ title: '加载失败', content: '加载更新记录失败', duration: 3, theme: 'light' });
     } finally {
       setHistoryLoading(false);
     }
@@ -167,7 +167,7 @@ const HotUpdate = () => {
   // 检测配置变更
   const handleDetect = async () => {
     if (!noticeRead) {
-      Toast.warning({ content: '请先阅读并确认注意事项', duration: 3 });
+      Notification.warning({ title: '提示', content: '请先阅读并确认注意事项', duration: 3, theme: 'light' });
       setActiveTab('notice');
       return;
     }
@@ -179,11 +179,13 @@ const HotUpdate = () => {
       if (json.code === 0) {
         setDetectResult(json.data);
         setCurrentPage('confirm');
+      } else if (json.code === 1002) {
+        Notification.info({ title: '检测完成', content: json.message || '当前无待更新的配置', duration: 5, theme: 'light' });
       } else {
-        Toast.error({ content: json.message || '检测失败', duration: 3 });
+        Notification.error({ title: '检测失败', content: json.message || '检测失败', duration: 3, theme: 'light' });
       }
     } catch {
-      Toast.error({ content: '检测请求失败，请检查网络连接', duration: 3 });
+      Notification.error({ title: '请求失败', content: '检测请求失败，请检查网络连接', duration: 3, theme: 'light' });
     } finally {
       setIsDetecting(false);
     }
@@ -238,7 +240,7 @@ const HotUpdate = () => {
       const res = await fetch('/api/hot-update/pre-check', { method: 'POST' });
       const json = await res.json();
       if (json.code !== 0) {
-        Toast.error({ content: json.message || '预检查失败', duration: 3 });
+        Notification.error({ title: '预检查失败', content: json.message || '预检查失败', duration: 3, theme: 'light' });
         return false;
       }
 
@@ -264,7 +266,7 @@ const HotUpdate = () => {
       }
       return true;
     } catch {
-      Toast.error({ content: '预检查请求失败，请重试', duration: 3 });
+      Notification.error({ title: '请求失败', content: '预检查请求失败，请重试', duration: 3, theme: 'light' });
       return false;
     } finally {
       setIsPreChecking(false);
@@ -312,11 +314,11 @@ const HotUpdate = () => {
         );
         startPolling(execId);
       } else {
-        Toast.error({ content: json.message || '执行请求失败', duration: 3 });
+        Notification.error({ title: '执行失败', content: json.message || '执行请求失败', duration: 3, theme: 'light' });
         setIsExecuting(false);
       }
     } catch {
-      Toast.error({ content: '执行请求失败，请检查网络连接', duration: 3 });
+      Notification.error({ title: '请求失败', content: '执行请求失败，请检查网络连接', duration: 3, theme: 'light' });
       setIsExecuting(false);
     }
   };
@@ -721,12 +723,20 @@ const HotUpdate = () => {
               >
                 返回
               </Button>
-              {!isExecuting && executionSteps.every(s => s.status === 'success') ? (
+              {isExecuting ? (
+                <Button type="primary" theme="solid" size="large" loading disabled>
+                  执行中...
+                </Button>
+              ) : executionSteps.some(s => s.status === 'error') ? (
+                <Button type="primary" theme="solid" size="large" onClick={handleReset}>
+                  重新开始
+                </Button>
+              ) : executionSteps.every(s => s.status === 'success') ? (
                 <Button type="primary" theme="solid" size="large" onClick={handleReset}>
                   开始新的更新
                 </Button>
               ) : (
-                <Button type="primary" theme="solid" size="large" loading={isExecuting} disabled>
+                <Button type="primary" theme="solid" size="large" disabled>
                   执行中...
                 </Button>
               )}
