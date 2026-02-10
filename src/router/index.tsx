@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import AdminLayout from '../layouts/AdminLayout';
 import Dashboard from '../pages/Dashboard';
 import UserManagement from '../pages/UserManagement';
@@ -7,14 +7,22 @@ import HotUpdate from '../pages/HotUpdate';
 import Login from '../pages/Login';
 import AccountSettings from '../pages/AccountSettings';
 
+const AuthGuard = () => {
+  const token = localStorage.getItem('token');
+  if (!token) return <Navigate to="/login" replace />;
+  return <Outlet />;
+};
+
 const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
   },
   {
-    path: '/',
-    element: <AdminLayout />,
+    element: <AuthGuard />,
+    children: [{
+      path: '/',
+      element: <AdminLayout />,
     children: [
       {
         index: true,
@@ -45,6 +53,7 @@ const router = createBrowserRouter([
         element: <AccountSettings />,
       },
     ],
+  }],
   },
 ]);
 
