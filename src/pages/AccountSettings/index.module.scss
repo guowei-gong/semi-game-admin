@@ -1,0 +1,39 @@
+.container {
+  max-width: 600px;
+}
+
+.section {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--semi-color-border);
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.sectionDesc {
+  color: var(--semi-color-text-2);
+  margin-bottom: 20px;
+}
+
+.form {
+  max-width: 400px;
+
+  :global(.semi-input-wrapper) {
+    border: 1px solid var(--semi-color-border);
+  }
+}
+
+.submitBtn {
+  margin-top: 8px;
+}

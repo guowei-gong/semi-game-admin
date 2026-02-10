@@ -7,7 +7,8 @@ import {
   Button,
   Space,
   Input,
-  Select
+  Select,
+  Banner
 } from '@douyinfe/semi-ui-19';
 import { IconSearch, IconPlus, IconEdit, IconDelete } from '@douyinfe/semi-icons';
 import styles from './index.module.scss';
@@ -152,6 +153,7 @@ const GameData = () => {
 
   return (
     <div>
+      <Banner type="info" description="当前页面为测试布局界面，所有数据均为模拟数据，不代表真实业务数据。" closeIcon={null} style={{ marginBottom: 16 }} />
       <Tabs>
         <TabPane tab="道具管理" itemKey="items">
           <div className={styles.toolbar}>

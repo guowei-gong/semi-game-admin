@@ -5,6 +5,7 @@ import UserManagement from '../pages/UserManagement';
 import GameData from '../pages/GameData';
 import HotUpdate from '../pages/HotUpdate';
 import Login from '../pages/Login';
+import AccountSettings from '../pages/AccountSettings';
 
 const router = createBrowserRouter([
   {
@@ -21,7 +22,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Dashboard />,
+        element: <div style={{ padding: 24 }}>仪表盘页面开发中...</div>,
       },
       {
         path: 'users',
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: 'settings',
         element: <div style={{ padding: 24 }}>系统设置页面开发中...</div>,
+      },
+      {
+        path: 'account-settings',
+        element: <AccountSettings />,
       },
     ],
   },

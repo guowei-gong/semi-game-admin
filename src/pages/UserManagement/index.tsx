@@ -7,7 +7,8 @@ import {
   Space,
   Avatar,
   Popconfirm,
-  Toast
+  Toast,
+  Banner
 } from '@douyinfe/semi-ui-19';
 import { IconSearch, IconPlus, IconDelete, IconEdit } from '@douyinfe/semi-icons';
 import styles from './index.module.scss';
@@ -129,6 +130,7 @@ const UserManagement = () => {
 
   return (
     <div>
+      <Banner type="info" description="当前页面为测试布局界面，所有数据均为模拟数据，不代表真实业务数据。" closeIcon={null} style={{ marginBottom: 16 }} />
       <div className={styles.toolbar}>
         <Input
           prefix={<IconSearch />}

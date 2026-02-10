@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Nav, Avatar, Dropdown, Button, Breadcrumb } from '@douyinfe/semi-ui-19';
 import {
-  IconUser,
   IconSetting,
   IconExit,
   IconSemiLogo,
@@ -38,6 +37,7 @@ const secondaryNavConfig: Record<string, { itemKey: string; text: string; icon: 
   ],
   settings: [
     { itemKey: '/settings', text: '系统设置', icon: <IconToast className={styles.secondaryIcon} /> },
+    { itemKey: '/account-settings', text: '账号设置', icon: <IconSetting className={styles.secondaryIcon} /> },
   ],
 };
 
@@ -48,6 +48,7 @@ const pathToPrimaryNav: Record<string, string> = {
   '/game-data': 'management',
   '/hot-update': 'management',
   '/settings': 'settings',
+  '/account-settings': 'settings',
 };
 
 // 一级导航名称映射
@@ -64,6 +65,7 @@ const pathToPageName: Record<string, string> = {
   '/game-data': '道具管理',
   '/hot-update': '热更新',
   '/settings': '系统设置',
+  '/account-settings': '账号设置',
 };
 
 const AdminLayout = () => {
@@ -159,8 +161,7 @@ const AdminLayout = () => {
               position="rightBottom"
               render={
                 <Dropdown.Menu>
-                  <Dropdown.Item icon={<IconUser />}>个人信息</Dropdown.Item>
-                  <Dropdown.Item icon={<IconSetting />}>账号设置</Dropdown.Item>
+                  <Dropdown.Item icon={<IconSetting />} onClick={() => navigate('/account-settings')}>账号设置</Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item
                     icon={<IconExit />}
