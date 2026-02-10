@@ -3,7 +3,6 @@ import { Nav, Avatar, Dropdown, Button, Breadcrumb } from '@douyinfe/semi-ui-19'
 import {
   IconSetting,
   IconExit,
-  IconSemiLogo,
   IconSun,
   IconMoon,
   IconChevronRight,
@@ -141,13 +140,8 @@ const AdminLayout = () => {
         mode="vertical"
         selectedKeys={[activePrimaryNav]}
         onSelect={handlePrimaryNavSelect}
-        header={{
-          logo: (
-            <div className={styles.logoWrap}>
-              <IconSemiLogo className={styles.semiIconsSemiLogo} />
-            </div>
-          ),
-        }}
+        header={{}}
+
         footer={
           <div className={styles.primaryFooter}>
             <Button
