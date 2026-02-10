@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, Button, Typography, Toast } from '@douyinfe/semi-ui-19';
+import { Form, Button, Typography, Notification } from '@douyinfe/semi-ui-19';
 import { request } from '../../utils/request';
 import styles from './index.module.scss';
 
@@ -11,7 +11,7 @@ const AccountSettings = () => {
 
   const handleSubmit = async (values: Record<string, string>) => {
     if (values.newPassword !== values.confirmPassword) {
-      Toast.error('两次输入的新密码不一致');
+      Notification.warning({ title: '提示', content: '两次输入的新密码不一致', duration: 3, theme: 'light' });
       return;
     }
 
@@ -26,13 +26,13 @@ const AccountSettings = () => {
       });
       const json = await res.json();
       if (json.code === 0) {
-        Toast.success('密码修改成功');
+        Notification.success({ title: '修改成功', content: '密码已更新', duration: 3, theme: 'light' });
         formApi?.reset();
       } else {
-        Toast.error(json.message || '密码修改失败');
+        Notification.error({ title: '修改失败', content: json.message || '密码修改失败', duration: 3, theme: 'light' });
       }
     } catch {
-      Toast.error('网络错误，请稍后重试');
+      Notification.error({ title: '请求失败', content: '网络错误，请稍后重试', duration: 3, theme: 'light' });
     } finally {
       setLoading(false);
     }
