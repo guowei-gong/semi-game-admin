@@ -19,8 +19,8 @@ const carouselData = [
   },
   {
     image: '/p3.jpg',
-    title: '用户运营工具',
-    description: '高效管理玩家账号，提供封禁、查询等运营能力',
+    title: '账户管理工具',
+    description: '高效管理玩家账号，提供添加指定道具，完成指定任务等功能',
   },
 ];
 
@@ -38,7 +38,7 @@ const Login = () => {
       });
       const json = await res.json();
       if (json.code === 0) {
-        localStorage.setItem('token', json.data.token);
+        localStorage.setItem('token', json.data.token.token);
         navigate('/dashboard');
       } else {
         Notification.error({
@@ -105,7 +105,7 @@ const Login = () => {
           </div>
           <Title heading={3} className={styles.welcomeTitle}>欢迎，管理员👋</Title>
           <Paragraph className={styles.welcomeDesc}>
-            全新开放世界角色冒险游戏。你将在游戏中探索一个被称作「莱纳星球」的幻想世界
+            全新开放世界角色冒险游戏。你将在游戏中探索一个被称作「莱纳」的幻想世界
           </Paragraph>
           <Divider className={styles.divider} />
 

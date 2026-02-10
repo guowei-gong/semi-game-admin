@@ -162,7 +162,14 @@ const AdminLayout = () => {
                   <Dropdown.Item icon={<IconUser />}>个人信息</Dropdown.Item>
                   <Dropdown.Item icon={<IconSetting />}>账号设置</Dropdown.Item>
                   <Dropdown.Divider />
-                  <Dropdown.Item icon={<IconExit />} type="danger">
+                  <Dropdown.Item
+                    icon={<IconExit />}
+                    type="danger"
+                    onClick={() => {
+                      localStorage.removeItem('token');
+                      navigate('/login');
+                    }}
+                  >
                     退出登录
                   </Dropdown.Item>
                 </Dropdown.Menu>

@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Card,
   Button,
   Collapsible,
   Tag,
   Typography,
-  Space,
   Banner,
   Table,
   Tabs,
@@ -30,6 +28,7 @@ import {
   IconPlay,
   IconSearch,
 } from '@douyinfe/semi-icons';
+import { request } from '../../utils/request';
 import styles from './index.module.scss';
 
 const { Text, Title } = Typography;
@@ -118,7 +117,7 @@ const HotUpdate = () => {
       if (keyword) params.set('keyword', keyword);
       params.set('page', '1');
       params.set('pageSize', '20');
-      const res = await fetch(`/api/hot-update/history?${params}`);
+      const res = await request(`/api/hot-update/history?${params}`);
       const json = await res.json();
       if (json.code === 0) {
         setHistoryData(json.data.list);
@@ -130,12 +129,7 @@ const HotUpdate = () => {
     }
   }, []);
 
-  // 初始加载更新记录
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
-
-  // 搜索关键词变化时重新加载
+  // 初始加载 & 搜索关键词变化时加载
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchHistory(searchKeyword || undefined);
@@ -174,7 +168,7 @@ const HotUpdate = () => {
 
     setIsDetecting(true);
     try {
-      const res = await fetch('/api/hot-update/detect', { method: 'POST' });
+      const res = await request('/api/hot-update/detect', { method: 'POST' });
       const json = await res.json();
       if (json.code === 0) {
         setDetectResult(json.data);
@@ -199,7 +193,7 @@ const HotUpdate = () => {
 
     const poll = async () => {
       try {
-        const res = await fetch(`/api/hot-update/executions/${execId}`);
+        const res = await request(`/api/hot-update/executions/${execId}`);
         const json = await res.json();
         if (json.code !== 0) return;
 
@@ -237,7 +231,7 @@ const HotUpdate = () => {
   const handlePreCheck = async (): Promise<boolean> => {
     setIsPreChecking(true);
     try {
-      const res = await fetch('/api/hot-update/pre-check', { method: 'POST' });
+      const res = await request('/api/hot-update/pre-check', { method: 'POST' });
       const json = await res.json();
       if (json.code !== 0) {
         Notification.error({ title: '预检查失败', content: json.message || '预检查失败', duration: 3, theme: 'light' });
@@ -289,7 +283,7 @@ const HotUpdate = () => {
     setIsExecuting(true);
 
     try {
-      const res = await fetch('/api/hot-update/execute', {
+      const res = await request('/api/hot-update/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
