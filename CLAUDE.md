@@ -57,6 +57,7 @@ npm run lint     # 代码检查
 - **Tooltip/Dropdown 触发元素**: 在 React 19 中，Tooltip、Dropdown、Popover 等弹出层组件的 children 需要用真实 DOM 节点（如 `<span>`）包裹，否则会出现 `triggerEle should be a valid DOM element` 警告
 - Semi Icons 中不存在 `IconGamepad`、`IconCoin` 等图标，需使用 `IconApps`、`IconCoinMoney` 等替代
 - 使用图标前请先查阅官方图标文档确认图标名称
+- **Git 提交**: commit message 中不要包含 `Co-Authored-By` 或任何 Claude/AI 相关的署名信息
 
 ## 开发记录
 - 2026-02-01: 项目初始化，完成基础框架搭建
