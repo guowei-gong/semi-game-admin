@@ -544,7 +544,7 @@ const HotUpdate = () => {
               <Banner
                 type="warning"
                 icon={<IconAlertTriangle />}
-                description="检测到表结构变更，执行更新时需要重建镜像，此过程可能需要几分钟。"
+                description="当前策划配置设计产生变动，无法使用热更新能力，请联系服务器。"
                 className={styles.confirmBanner}
               />
             ) : (
@@ -633,6 +633,7 @@ const HotUpdate = () => {
                   size="large"
                   icon={<IconPlay />}
                   loading={isPreChecking}
+                  disabled={detectResult?.hasSchemaChange}
                   onClick={handleConfirmAndExecute}
                 >
                   确认并开始热更新
