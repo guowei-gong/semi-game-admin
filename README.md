@@ -1,73 +1,32 @@
-# React + TypeScript + Vite
+# 游戏管理后台 (Game Admin Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 项目概述
+基于 Semi Design 构建的游戏管理员后台系统。
 
-Currently, two official plugins are available:
+## 技术栈
+- **框架**: React 19 + TypeScript
+- **构建工具**: Vite 7
+- **UI 组件库**: Semi Design (@douyinfe/semi-ui-19，React 19 专用版本)
+- **主题**: 飞书 Universe Design (@semi-bot/semi-theme-feishu1.0)
+- **路由**: React Router DOM 7
+- **图标**: @douyinfe/semi-icons（icons 包无需 React 19 专用版本）
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 项目结构
 ```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+src/
+├── layouts/          # 布局组件
+│   ├── AdminLayout.tsx        # 管理后台主布局（顶部导航+左侧Tabs）
+│   └── AdminLayout.module.scss # 布局样式文件
+├── pages/            # 页面组件
+│   ├── Dashboard/        # 仪表盘
+│   ├── UserManagement/   # 用户管理
+│   ├── GameData/         # 游戏数据
+│   └── Login/            # 登录页
+├── router/           # 路由配置
+│   └── index.tsx
+├── components/       # 公共组件（待开发）
+├── styles/           # 全局样式（待开发）
+├── App.tsx           # 应用入口
+├── main.tsx          # 渲染入口
+└── index.css         # 全局样式
 ```
